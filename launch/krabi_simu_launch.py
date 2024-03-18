@@ -60,21 +60,5 @@ def generate_launch_description():
                 'yRobotPos': yRobotPos_value,
                 'zRobotOrientation_value': zRobotOrientation_value
             }.items()
-        ),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([
-                PathJoinSubstitution([
-                    FindPackageShare('goal_strategy'),
-                    'launch',
-                    'goal_strat_launch.py'
-                ])
-            ])
-            #,launch_arguments={
-            #    'turtlesim_ns': 'turtlesim2',
-            #    'use_provided_red': 'True',
-            #    'new_background_r': TextSubstitution(text=str(colors['background_r']))
-            #}.items()
         )
-    
-        
     ])

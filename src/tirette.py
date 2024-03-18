@@ -17,6 +17,7 @@ def main():
         publisher.publish(msg)
         node.get_logger().info('Published: %r' % msg.data)
         rclpy.spin_once(node)
+        sleep(0.1)
 
     node.destroy_node()
     rclpy.shutdown()
