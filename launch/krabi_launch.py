@@ -7,12 +7,15 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
 from launch.substitutions import PathJoinSubstitution, TextSubstitution
 from launch.substitutions import Command, LaunchConfiguration, PythonExpression
+from launch.conditions import IfCondition, UnlessCondition
 
 def generate_launch_description():
     isBlue_value = LaunchConfiguration('isBlue')
     xRobotPos_value = LaunchConfiguration('xRobotPos')
     yRobotPos_value = LaunchConfiguration('yRobotPos')
     zRobotOrientation_value = LaunchConfiguration('zRobotOrientation')
+    isSimulation_value = LaunchConfiguration('isSimulation')
+    use_lidar_loc_value = LaunchConfiguration('use_lidar_loc')
     
     isBlue_launch_arg = DeclareLaunchArgument(
         'isBlue',
@@ -30,9 +33,28 @@ def generate_launch_description():
         'zRobotOrientation',
         default_value='0.0'
     )
+    isSimulation_launch_arg = DeclareLaunchArgument(
+        'isSimulation',
+        default_value='true'
+    )
+    use_lidar_loc_launch_arg = DeclareLaunchArgument(
+        'use_lidar_loc',
+        default_value='false'
+    )
 
+    odom_map_spawn = Node(package='tf2_ros',
+        executable='static_transform_publisher',
+        output='both',
+        namespace="krabi_ns",
+        arguments=["--x", xRobotPos_value, "--y", yRobotPos_value, "--z", "0", "--roll", "0", "--pitch", "0", "--yaw", zRobotOrientation_value,
+                    "--child-frame-id", "odom", "--frame-id", "map"],
+        condition=UnlessCondition(use_lidar_loc_value)
+    )
 
-    return LaunchDescription([isBlue_launch_arg, xRobotPos_launch_arg, yRobotPos_launch_arg, zRobotOrientation_launch_arg,
+    
+
+    launch_description = LaunchDescription([isBlue_launch_arg, xRobotPos_launch_arg, yRobotPos_launch_arg, zRobotOrientation_launch_arg,
+                                            isSimulation_launch_arg, use_lidar_loc_launch_arg, odom_map_spawn,
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([
@@ -46,8 +68,35 @@ def generate_launch_description():
                 'xRobotPos': xRobotPos_value,
                 'yRobotPos': yRobotPos_value,
                 'zRobotOrientation_value': zRobotOrientation_value
-            }.items()
+            }.items(),
+                        condition=IfCondition(isSimulation_value)
         ),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('krabi_bringup'),
+                    'launch',
+                    'krabi_hardware_launch.py'
+                ])
+            ])
+            ,launch_arguments={
+                'use_lidar_loc': use_lidar_loc_value
+            }.items(),
+            condition=UnlessCondition(isSimulation_value)
+        ),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('krabi_bringup'),
+                    'launch',
+                    'transforms_launch.py'
+                ])
+            ]),
+            condition=UnlessCondition(isSimulation_value)
+        ),
+
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([
@@ -56,12 +105,26 @@ def generate_launch_description():
                     'krabi_main_launch.py'
                 ])
             ])
-            #,launch_arguments={
-            #    'turtlesim_ns': 'turtlesim2',
-            #    'use_provided_red': 'True',
-            #    'new_background_r': TextSubstitution(text=str(colors['background_r']))
-            #}.items()
-        )
-    
-        
+        ),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('main_strategy'),
+                    'launch',
+                    'odom_TF_pub_launch.py'
+                ])
+            ]),
+            launch_arguments={
+                'publish_tf_odom': "true",
+                'init_pose/x': xRobotPos_value,
+                'init_pose/y': yRobotPos_value,
+                'init_pose/theta': zRobotOrientation_value
+            }.items(),
+            condition=UnlessCondition(isSimulation_value)
+        ) 
     ])
+
+
+
+    return launch_description

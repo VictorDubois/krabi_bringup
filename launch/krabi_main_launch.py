@@ -17,11 +17,6 @@ def generate_launch_description():
                     'main_strat_launch.py'
                 ])
             ])
-            #,launch_arguments={
-            #    'turtlesim_ns': 'turtlesim2',
-            #    'use_provided_red': 'True',
-            #    'new_background_r': TextSubstitution(text=str(colors['background_r']))
-            #}.items()
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
@@ -31,11 +26,6 @@ def generate_launch_description():
                     'goal_strat_launch.py'
                 ])
             ])
-            #,launch_arguments={
-            #    'turtlesim_ns': 'turtlesim2',
-            #    'use_provided_red': 'True',
-            #    'new_background_r': TextSubstitution(text=str(colors['background_r']))
-            #}.items()
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
@@ -45,11 +35,6 @@ def generate_launch_description():
                     'lidar_strat_launch.py'
                 ])
             ])
-            #,launch_arguments={
-            #    'turtlesim_ns': 'turtlesim2',
-            #    'use_provided_red': 'True',
-            #    'new_background_r': TextSubstitution(text=str(colors['background_r']))
-            #}.items()
         )
     
         
