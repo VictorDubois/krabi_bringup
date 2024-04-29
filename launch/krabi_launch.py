@@ -19,15 +19,15 @@ def generate_launch_description():
     
     isBlue_launch_arg = DeclareLaunchArgument(
         'isBlue',
-        default_value='false'
+        default_value='False'
     )
     xRobotPos_launch_arg = DeclareLaunchArgument(
         'xRobotPos',
-        default_value='1.25'
+        default_value='-1.25'
     )
     yRobotPos_launch_arg = DeclareLaunchArgument(
         'yRobotPos',
-        default_value='0.5'
+        default_value='-0.75'
     )
     zRobotOrientation_launch_arg = DeclareLaunchArgument(
         'zRobotOrientation',
@@ -39,7 +39,7 @@ def generate_launch_description():
     )
     use_lidar_loc_launch_arg = DeclareLaunchArgument(
         'use_lidar_loc',
-        default_value='false'
+        default_value='False'
     )
 
     odom_map_spawn = Node(package='tf2_ros',
@@ -48,7 +48,7 @@ def generate_launch_description():
         namespace="krabi_ns",
         arguments=["--x", xRobotPos_value, "--y", yRobotPos_value, "--z", "0", "--roll", "0", "--pitch", "0", "--yaw", zRobotOrientation_value,
                     "--child-frame-id", "odom", "--frame-id", "map"],
-        condition=UnlessCondition(use_lidar_loc_value)
+        condition=IfCondition(PythonExpression([use_lidar_loc_value, " and not ", isSimulation_value]))
     )
 
     
